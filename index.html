@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <title>UP Pool Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background-image: url('https://i.ibb.co/twgj32wv/bg-up.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 360px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      color: #800000;
+      font-size: 1.6rem;
+      margin-bottom: .3rem;
+      font-weight: 700;
+    }
+    .subtitle { text-align:center;color:#555;font-size:.8rem;margin-bottom:1rem; }
+    label { display:block;margin-top:.8rem;font-weight:600;font-size:.9rem;color:#333; }
+    input[type="number"]{ width:100%;padding:.5rem;margin-top:.3rem;border:1px solid #ccc;border-radius:6px;font-size:.95rem; }
+    .time-inputs{display:flex;justify-content:space-between;align-items:center;gap:.4rem;margin-top:.3rem;}
+    .time-inputs input{width:100%;padding:.5rem;border:1px solid #ccc;border-radius:6px;font-size:.95rem;text-align:center;}
+    .separator{font-weight:bold;font-size:1rem;}
+    button{margin-top:1.2rem;width:100%;padding:.7rem;background:#800000;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:1rem;font-weight:600;transition:background-color .3s;}
+    button:hover{background:#5c0000;}
+    #result{margin-top:1.4rem;text-align:center;font-size:1.15rem;color:#222;font-weight:700;line-height:1.6;}
+    #result span{display:block;margin-top:.4rem;font-size:1.35rem;}
+    #calc-details{margin-top:1rem;font-size:0.85rem;color:#444;line-height:1.4;text-align:left;}
+    @media(max-width:480px){.container{padding:1rem;margin: 1rem;}.container input,.container button{font-size:0.95rem;}h1{font-size:1.4rem;}.subtitle{font-size:.75rem;}label{font-size:.85rem;}#result{font-size:1rem;}#result span{font-size:1.2rem;}}h1{font-size:1.5rem;}.subtitle{font-size:.75rem;}label{font-size:.85rem;}input,button{font-size:.9rem;}#result{font-size:1rem;}#result span{font-size:1.2rem;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UP Pool Converter</h1>
+    <p class="subtitle">Convert your 40 m‑pool swim time into an estimated 50 m time. Constant‑speed and turn‑adjusted results shown (adds 0.5 s for every turn — 2 laps = 1 turn).</p>
+
+    <label for="laps">Number of 40 m Laps:</label>
+    <input type="number" id="laps" min="1" placeholder="e.g. 2" />
+
+    <label>Enter Time:</label>
+    <div class="time-inputs">
+      <input type="number" id="minutes" min="0" placeholder="Min" />
+      <span class="separator">:</span>
+      <input type="number" id="seconds" min="0" max="59" placeholder="Sec" />
+      <span class="separator">.</span>
+      <input type="number" id="milliseconds" min="0" max="999" placeholder="Ms" />
+    </div>
+
+    <button onclick="convertTime()">Convert to 50 m</button>
+
+    <div id="result"></div>
+    <div id="calc-details"></div>
+  </div>
+
+  <script>
+    function formatTime(totalSeconds){
+      const mins=Math.floor(totalSeconds/60);
+      const secs=Math.floor(totalSeconds%60).toString().padStart(2,'0');
+      const ms=Math.round((totalSeconds%1)*1000).toString().padStart(3,'0');
+      return `${mins}m ${secs}.${ms}s`; }
+
+    function convertTime(){
+      const laps=parseInt(document.getElementById('laps').value);
+      const minutes=parseInt(document.getElementById('minutes').value)||0;
+      const seconds=parseInt(document.getElementById('seconds').value)||0;
+      const milliseconds=parseInt(document.getElementById('milliseconds').value)||0;
+      if(!laps||laps<1||seconds>59||milliseconds>999){
+        document.getElementById('result').innerText='Please enter valid lap and time values.';
+        document.getElementById('calc-details').innerHTML='';
+        return;}
+
+      const totalTime=(minutes*60)+seconds+(milliseconds/1000);
+      const distance40=laps*40;
+      const pacePerMetre=totalTime/distance40;
+      const distance50=(distance40/40)*50;
+      const baseTime=pacePerMetre*distance50;
+
+      const turns = Math.floor(laps / 2); // Each 2 laps = 1 turn
+      const adjustedTime = baseTime + (turns * 0.5);
+
+      document.getElementById('result').innerHTML=
+        `Estimated 50 m Pool Time (constant speed):<br><span>${formatTime(baseTime)}</span><br>`+
+        `Estimated 50 m Pool Time (adjusted for turns):<br><span>${formatTime(adjustedTime)}</span>`;
+
+      document.getElementById('calc-details').innerHTML =
+        `Detailed Calculation:<br>`+
+        `Total time: ${totalTime.toFixed(3)} s<br>`+
+        `Distance swam: ${distance40} m<br>`+
+        `Converted distance: ${distance50} m<br>`+
+        `Turns from laps: ${turns}<br>`+
+        `Base time (no turn adj.): ${baseTime.toFixed(3)} s<br>`+
+        `Adjusted time (+0.5 s/turn): ${adjustedTime.toFixed(3)} s`;
+    }
+  </script>
+</body>
+</html>
